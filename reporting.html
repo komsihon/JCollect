@@ -1,0 +1,854 @@
+
+
+<!DOCTYPE html>
+<html lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>MoMo Report - Cyberlink</title>
+
+
+
+            <link rel='stylesheet' href="style/font-awesome/css/font-awesome.min.css" />
+            <link rel='stylesheet' href="style/flatly.bootstrap.min.css" />
+            <link rel='stylesheet' href="style/base.css" />
+            <link rel='stylesheet' href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+            <style>
+                html {height: 100%; padding-bottom: 1px}
+                #navbar {background: #fff; z-index: 10}
+                .category {border-radius: 3px; color: #fff; cursor: pointer; margin-top: 15px; padding: 1px 10px 10px}
+                .category .amount {float:right; font-size: 35px; font-weight: 700}
+                .category.successful {background: #449d44}
+                .category.running {background: #f1b900}
+                .category.failed {background: #e85f4c}
+                .category.dropped {background: #740cda}
+                .table>thead>tr>th {background: #f8f6f6; border-bottom: 2px solid #ddd}
+                .tx-list td {cursor: pointer}
+                .table>tbody>tr.warning>td, .table-hover>tbody>tr.warning:hover>td {background: #fff0d9; color: #545454}
+                #content .spinner {background: #ffffffa8; height: 100%;left: 0;position: absolute;width: 100%;z-index: 1}
+                .custom-period {display: none; font-size: .9em; margin-top: 33px}
+            </style>
+
+
+            <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+            <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+            <!--[if lt IE 9]>
+              <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+              <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+            <![endif]-->
+            <script src="scripts/jquery-1.12.4.min.js"></script>
+
+    </head>
+    <body>
+        <nav id="navbar" class="has-shade">
+            <div class="container">
+                <span id="logo" style="float: left; padding-top: 10px">
+                    <img src="http://cyberlink.cm/static/cyberlink/img/logo-creolink.jpg" height="50"/>
+                    <strong class="hidden-xs">JUMBO COLLECT</strong>
+                </span>
+                <div class="pull-right">
+                    <ul class="nav navbar-nav navbar-right" style="margin: -4px -15px 0 0">
+
+                            <li id="user-menu" class="dropdown">
+                                <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+                                            <span style="padding: 3px 20px">Jumbo user</span>
+
+                                    <i class="glyphicon glyphicon-user">
+                                    </i>
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="user-menu" style="padding: 0">
+
+                                        <li style="padding: 3px 20px">Jumbo user</li>
+
+                                    <li role="separator" class="divider "></li>
+                                    <li>
+
+                                            <a href="http://hotlink.net"><span class="glyphicon glyphicon-signal"></span>Login</a>
+
+                                    </li>
+                                    <li>
+                                        <a href="#"><span class="glyphicon glyphicon-list-alt"></span>History</a>
+                                    </li>
+
+                                        <li>
+                                            <a href="/MoMoReport/"><span class="glyphicon glyphicon-list-alt"></span>Reporting</a>
+                                        </li>
+
+                                    <li>
+                                        <a href="/ikwen/accountSetup/"><span class="glyphicon glyphicon-th-list"></span>Account info</a>
+                                    </li>
+                                    <li>
+                                        <a href="/ikwen/logout"><span class="glyphicon glyphicon-log-out"></span>Logout</a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div id="content">
+            <div class="container">
+                <h3 class="text-center" style="margin: 5px 0 15px">Reporting</h3>
+                <div id="filter">
+                    <form id="criteria" onsubmit="return false" class="row">
+                        <div class="form-group col-sm-4 col-lg-3">
+                            <label for="operator">Operator</label>
+                            <select id="operator" name="operator" class="form-control input-sm">
+                                <option value="">All</option>
+                                <option value="mtn-momo">MTN MoMo</option>
+                                <option value="orange-money">Orange Money</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-sm-4 col-lg-3">
+                            <label for="app">App</label>
+                            <select id="app" name="service_id" class="form-control input-sm">
+                                <option value="">All</option>
+
+                                    <option value="59eec43888fa3f6ea73b6d3c">Gateway</option>
+
+                                    <option value="kakocase">Kakocase</option>
+
+                                    <option value="56ad2bd9b37b335a18fe5861">VOD</option>
+
+                                    <option value="587902966c526512986ce145">Cyberlink</option>
+
+                            </select>
+                        </div>
+                        <div class="form-group col-sm-4 col-lg-3">
+                            <label for="period">Period</label>
+                            <select id="period" name="period" class="form-control input-sm">
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="last_7_days">Last 7 days</option>
+                                <option value="last_28_days">Last 28 days</option>
+                                <option value="since_the_1st">Since the 1st of month</option>
+                                <option value="other" data-toggle="modal" data-target="#period-chooser">Other ...</option>
+                            </select>
+                            <input type="hidden" id="start-alt" name="start_date" />
+                            <input type="hidden" id="end-alt" name="end_date" />
+                            <input type="hidden" id="is-running" name="is_running" />
+                            <input type="hidden" id="status" name="status" />
+                            <input type="hidden" id="page" name="page" />
+                        </div>
+                        <div class="form-group col-sm-4 col-lg-3">
+                            <div class="custom-period">
+                                <span class="start text-muted">17/02/2018</span> -
+                                <span class="end text-muted">19/02/2018</span>                                &nbsp;&nbsp;
+                                <a href="javascript:;"
+                                   data-toggle="modal" data-target="#period-chooser">Change</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="results">
+
+
+                    <div class="spinner" style="display: none">
+                        <div style="margin: 15px auto; width: 52px">
+                            <svg class="spinner-container" width="50px" height="50px" viewBox="0 0 52 52">
+                                <circle class="path" cx="26px" cy="26px" r="20px" fill="none" stroke-width="4px"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div style="border-top: 1px solid #ddd; margin-top: 20px">
+                        <div style="background: #fff; width: 300px; margin: -22px auto 0; text-align: center">
+                            <button class="btn btn-disabled see-all" style="width: 240px">See All</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-6 col-md-3">
+                            <div class="category successful" data-status="Success">
+                                <h4>Successful:
+                                    <span class="count">
+                                        47
+                                    </span>
+                                </h4>
+                                <div class="amount">
+
+                                        503,100
+
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-md-3">
+                            <div class="category running" data-status="Running">
+                                <h4>Running:
+                                    <span class="count">
+                                        0
+                                    </span>
+                                </h4>
+                                <div class="amount">
+
+                                        0
+
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-md-3">
+                            <div class="category failed" data-status="Failure">
+                                <h4>Failed:
+                                    <span class="count">
+                                        9
+                                    </span>
+                                </h4>
+                                <div class="amount">
+
+                                        100,579
+
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                        <div class="col-xs-6 col-md-3">
+                            <div class="category dropped" data-status="Dropped">
+                                <h4>Dropped:
+                                    <span class="count">
+                                        51
+                                    </span>
+                                </h4>
+                                <div class="amount">
+
+                                        390,450
+
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+
+                    <div class="table-responsive" style="margin-top: 15px">
+
+                        <table class="table table-condensed table-hover table-stripped tx-list">
+                            <thead>
+                                <tr>
+                                    <th>Operator</th>
+                                    <th>App.</th>
+                                    <th>Phone</th>
+                                    <th>Amount</th>
+                                    <th>User ID</th>
+                                    <th>Operator TX ID</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="7jd3T1u11rFqSu4cdjwT8ia5hgQJfS">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">6,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 16:23:34</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="8QBs3bhuF9xMxEBghkEDDHoL4dIAEj">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">9,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 16:18:36</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1623.A10530" data-object-id="eA1UERFFaSphwxix8fEc7UW3RTnXML">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">5,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1623.A10530</td>
+                                    <td class="date">2018-12-29 16:16:26</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1620.A10499" data-object-id="qWrjRwWwygjlZjwt34spUL3yz2wIDl">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">1,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1620.A10499</td>
+                                    <td class="date">2018-12-29 16:14:14</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1618.A10461" data-object-id="pWlQsYwC1ajzKr4Sbiaj5Ha58Cre4S">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1618.A10461</td>
+                                    <td class="date">2018-12-29 16:12:11</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="nWcjPGUtFT5zYEApPGCp6YXFILk54y">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">11,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 16:11:53</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="laIvqMCKXz52U4zveHSr1ufQ95TMgF">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 16:11:26</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1618.A10458" data-object-id="0gzFNFygWrAypdLqU90oV9X5F1dILt">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">5,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1618.A10458</td>
+                                    <td class="date">2018-12-29 16:11:16</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="Transaction failed." data-operator-tx-id="" data-object-id="QwGY5uT5ctmekLZHFYAFxP8VF9xdwE">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">1,079</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 16:10:13</td>
+                                    <td class="status">Failure</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1614.A10411" data-object-id="JogD23acsPFpU7gpJuMswHnAL1v9JM">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">3,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1614.A10411</td>
+                                    <td class="date">2018-12-29 16:07:21</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1619.A10479" data-object-id="hPvFdLdsjGrRM7T6RQPbW4DgLsNLib">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">4,500</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1619.A10479</td>
+                                    <td class="date">2018-12-29 16:06:37</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1553.A10127" data-object-id="WrHP02NMZdOPUHrDWM8f5xHSfw6o8e">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">17,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1553.A10127</td>
+                                    <td class="date">2018-12-29 15:46:55</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="3I0fHVS3ABide27uadwcdSCCoogTt7">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:46:21</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1549.A10062" data-object-id="dVmhQPyXz8M88NMbLKAiRF4NwLSQ6z">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">60,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1549.A10062</td>
+                                    <td class="date">2018-12-29 15:43:20</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1549.A10052" data-object-id="HPKWh9foJSAl65mOAy3C7EFDPxEgAC">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1549.A10052</td>
+                                    <td class="date">2018-12-29 15:42:15</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="DDImRxW5UsMcRP9Dre3HGClafXP7WL">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:41:44</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="Tgc8dfaGTMloOlpcXqmr0mDTeYdkzF">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:41:20</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="YWFR7OfJJDLa5CzZL1UsvVYhayeayx">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:39:34</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="0EGR51jfEb18xcKMxcA5OwLoGPj1YJ">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:38:25</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1526.A09715" data-object-id="EIWLs4RbRHJlFrYwlFLgZB22zQr9US">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">6,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1526.A09715</td>
+                                    <td class="date">2018-12-29 15:19:20</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="Transaction failed." data-operator-tx-id="" data-object-id="SSHuMNDFg5328ZnjjtTwd4eJcyzcI8">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:14:27</td>
+                                    <td class="status">Failure</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="oqgbBKrhssP8tt0AmyiUSi4PXOPY9U">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:13:55</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="k39fyvHBLVNN4puS5ljQReSH28Fjsh">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:13:36</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1519.A09633" data-object-id="sKndJPTrcGx5zckWD1kCfwzE3gnKxd">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">30,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1519.A09633</td>
+                                    <td class="date">2018-12-29 15:12:40</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="Transaction failed." data-operator-tx-id="" data-object-id="vyzILZ5hQotbhci4DMlohQRQFjYyYs">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">11,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:09:55</td>
+                                    <td class="status">Failure</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1516.A09582" data-object-id="KwWDzNc2aTZCCrYZPHUAGHNyvMQhbI">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">3,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1516.A09582</td>
+                                    <td class="date">2018-12-29 15:07:22</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="OK" data-operator-tx-id="MP181229.1515.A09558" data-object-id="XsBBoWCKDGXvQSwDSqyyeyjaY46wsc">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">3,500</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id">MP181229.1515.A09558</td>
+                                    <td class="date">2018-12-29 15:06:26</td>
+                                    <td class="status">Success</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="Transaction failed." data-operator-tx-id="" data-object-id="8VARtbwWWN9AOFjaPW9nuy03Lev8kx">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">11,500</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:06:05</td>
+                                    <td class="status">Failure</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="e2rclbZev2M6SNsXT4cY6FjWu3KUly">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">3,500</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:05:49</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="6L2zWroL1ejrzDxdICY70x5d0Umhrb">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">11,500</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:05:34</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="jGR1QqR4LLJm0bdxxeDbMpIPXN1YPo">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">3,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:05:31</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="SdlEeRjIKyiYRQdA8AprTwdhILvFTi">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:05:05</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="UbfN0R7BuqEH4XIABoXLCHYlEymRcN">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">3,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:03:47</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="BPG06OKJIVSlH6TgMTtPWd9WKABmoK">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:03:31</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="23ZErcKMlBwvvnBOo76QwXp1DDr6aI">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:03:08</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="GqovEdKE3dMAAqhyykHBncwHVFroTa">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">12,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:02:37</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="4rZbwQH0DfU2XL6io3bvlUB1rO42FB">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">3,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:02:35</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                                <tr class=""
+                                    data-message="None" data-operator-tx-id="" data-object-id="RumWgXctSOx8W6Ae3a6oBrU1bbTunk">
+                                    <td class="operator">orange-money</td>
+                                    <td class="app">Gateway</td>
+                                    <td class="phone">&lt;Unknown&gt;</td>
+                                    <td class="amount">3,000</td>
+                                    <td class="user-id">None</td>
+                                    <td class="tx-id"></td>
+                                    <td class="date">2018-12-29 15:01:54</td>
+                                    <td class="status">Dropped</td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <ul class="pagination">
+
+
+                            <li class="page active" data-val="1">
+                                <a href="#">
+                                    1 <span class="sr-only">(current)</span>
+                                </a>
+                            </li>
+
+                            <li class="page" data-val="2">
+                                <a href="#">
+                                    2
+                                </a>
+                            </li>
+
+                            <li class="page" data-val="3">
+                                <a href="#">
+                                    3
+                                </a>
+                            </li>
+
+
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+        <div id="period-chooser" class="modal fade" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content modal-info">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Choose custom period</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form onsubmit="return false">
+                            <div class="form-group">
+                                <label for="start-date">From:</label>
+                                <input type="text" id="start-date" class="form-control input-sm" />
+                            </div>
+                            <div class="form-group">
+                                <label for="end-date">To:</label>
+                                <input type="text" id="end-date" class="form-control input-sm" />
+                            </div>
+                        </form>
+                        <div class="actions">
+                            <div class="col-xs-12 col-sm-4 col-md-3 pull-right">
+                                <button class="btn btn-sm btn-success btn-block confirm-period"
+                                        data-dismiss="modal" aria-label="Close">OK</button>
+                            </div>
+                            <div class="col-xs-12 col-sm-4 col-md-3 pull-right">
+                                <button class="btn btn-sm btn-default btn-block cancel-period"
+                                        data-dismiss="modal" aria-label="Close">Cancel</button>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="tx-details" class="modal fade" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content modal-info">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Transaction details</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <strong class="col-xs-4">Phone :</strong>
+                            <span class="col-xs-8 text-muted phone"></span>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="row">
+                            <strong class="col-xs-4">Amount :</strong>
+                            <span class="col-xs-8 text-muted amount"></span>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="row">
+                            <strong class="col-xs-4">App :</strong>
+                            <span class="col-xs-8 text-muted app"></span>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="row">
+                            <strong class="col-xs-4">Date :</strong>
+                            <span class="col-xs-8 text-muted date"></span>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="row">
+                            <strong class="col-xs-4">Status :</strong>
+                            <span class="col-xs-8 text-muted status"></span>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="row">
+                            <strong class="col-xs-4">Operator :</strong>
+                            <span class="col-xs-8 text-muted operator"></span>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="row">
+                            <strong class="col-xs-4">Operator TX ID :</strong>
+                            <span class="col-xs-8 text-muted operator-tx-id"></span>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="row">
+                            <strong class="col-xs-4">Object ID :</strong>
+                            <span class="col-xs-8 text-muted object-id"></span>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="row">
+                            <strong class="col-xs-4">Message :</strong>
+                            <span class="col-xs-8 text-muted message"></span>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="scripts/jquery-1.12.4.min.js"></script>
+        <script src="scripts/jquery-ui.js"></script>
+        <script src="scripts/bootstrap.min.js"></script>
+        <script type="text/javascript">
+            (function() {
+                $('#start-date').datepicker({
+                    altField: "#start-alt",
+                    altFormat: "yy-mm-dd"
+                });
+                $('#end-date').datepicker({
+                    altField: "#end-alt",
+                    altFormat: "yy-mm-dd"
+                });
+                var period = 'today';  // Initial period is today
+                $('#period').change(function() {
+                    var val = $(this).val();
+                    if (val === 'other') {
+                        $('#period-chooser').modal('show');
+                    } else {
+                        period = val;
+                        $('.custom-period').hide();
+                        loadResults();
+                    }
+                });
+
+            })()
+        </script>
+    </body>
+</html>
