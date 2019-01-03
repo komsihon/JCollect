@@ -246,6 +246,7 @@ time {color: #888;float: right;font-size: 11px; font-weight: normal; padding: 0;
 .btn .glyphicon, .btn .fa {margin: 0 10px 0 -10px}
 @media (max-width: 767px) {
     .category .amount {font-size: 25px}
+    .category h4 {font-size: 15px}
     .card-xs {padding: 0}
     .modal .actions .action, .modal .actions .btn {margin-top: .6em}
     .ik-li.img-lg {padding: 8px 6px}
@@ -343,7 +344,7 @@ time {color: #888;float: right;font-size: 11px; font-weight: normal; padding: 0;
     .payment-method {display: inline}
 }
 @media (max-width: 991px) {
-    #navbar .navbar-nav .open .dropdown-menu {background: #fff;max-height: 450px;overflow: auto;min-width: 200px;}
+    #navbar .navbar-nav .open .dropdown-menu {background: #fff;max-height: 450px;overflow: auto;min-width: 200px;box-shadow: 0 6px 12px rgba(0,0,0,0.175);}
     .dropdown-menu>li>a {line-height: 35px;}
 }
 @media (min-width: 992px) {
